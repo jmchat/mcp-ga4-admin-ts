@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+      "target": "ES2020", // Of nieuwer
+      "module": "NodeNext", // Gebruik moderne Node.js module resolutie
+      "moduleResolution": "NodeNext",
+      "outDir": "./dist",
+      "rootDir": "./src",
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true // Belangrijk voor google-auth-library
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
+  }

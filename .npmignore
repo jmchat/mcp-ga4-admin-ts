@@ -1,0 +1,22 @@
+# Ignore credentials and environment files
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+.env
+.env.*
+
+# Ignore development files
+node_modules/
+src/
+.git/
+.github/
+.vscode/
+
+# Keep dist folder
+!dist/**/*.js
+!bin/**/*.js
+
+# Keep README and LICENSE
+!README.md
+!LICENSE

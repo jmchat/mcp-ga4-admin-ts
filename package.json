@@ -1,0 +1,42 @@
+{
+  "name": "mcp-ga4-admin",
+  "version": "1.0.6",
+  "description": "Google Analytics 4 Admin API tools via Model Context Protocol",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-ga4-admin": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "watch": "nodemon --exec ts-node src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "google-analytics",
+    "ga4",
+    "analytics",
+    "admin",
+    "mcp",
+    "model-context-protocol",
+    "annotations"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google-analytics/admin": "^8.1.0",
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
+    "google-auth-library": "^10.0.0-rc.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}

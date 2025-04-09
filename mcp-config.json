@@ -1,0 +1,177 @@
+{
+  "name": "google-analytics-admin",
+  "version": "1.0.0",
+  "description": "Google Analytics Admin API MCP Server",
+  "transport": {
+    "type": "stdio"
+  },
+  "tools": [
+    {
+      "name": "list_ga4_accounts",
+      "description": "List all Google Analytics 4 accounts accessible by the service account."
+    },
+    {
+      "name": "get_ga4_property_details",
+      "description": "Get details for a specific Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          }
+        },
+        "required": ["property_id"]
+      }
+    },
+    {
+      "name": "list_ga4_properties",
+      "description": "List all Google Analytics 4 properties within a specific account.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "description": "The account ID (numeric part of the account name, e.g., '123456' from 'accounts/123456')"
+          }
+        },
+        "required": ["account_id"]
+      }
+    },
+    {
+      "name": "list_data_streams",
+      "description": "List all data streams for a specific Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          }
+        },
+        "required": ["property_id"]
+      }
+    },
+    {
+      "name": "list_annotations",
+      "description": "List all annotations for a specific Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          }
+        },
+        "required": ["property_id"]
+      }
+    },
+    {
+      "name": "create_annotation",
+      "description": "Create a new annotation for a specific Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the annotation"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time of the annotation in ISO 8601 format (e.g., '2023-04-01T00:00:00Z')"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "Optional end time of the annotation in ISO 8601 format (e.g., '2023-04-02T00:00:00Z')"
+          },
+          "annotation_type": {
+            "type": "string",
+            "enum": ["ANNOTATION_TYPE_UNSPECIFIED", "GOOGLE_DEFINED", "USER_DEFINED"],
+            "description": "Type of the annotation"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["ANNOTATION_CATEGORY_UNSPECIFIED", "ANALYTICS_AUTOMATIC", "ANALYTICS_MANUAL", "GOOGLE_ADS", "OTHER"],
+            "description": "Category of the annotation"
+          }
+        },
+        "required": ["property_id", "description", "start_time"]
+      }
+    },
+    {
+      "name": "get_annotation",
+      "description": "Get details of a specific annotation in a Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          },
+          "annotation_id": {
+            "type": "string",
+            "description": "The ID of the annotation"
+          }
+        },
+        "required": ["property_id", "annotation_id"]
+      }
+    },
+    {
+      "name": "update_annotation",
+      "description": "Update an existing annotation in a Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          },
+          "annotation_id": {
+            "type": "string",
+            "description": "The ID of the annotation to update"
+          },
+          "description": {
+            "type": "string",
+            "description": "New description of the annotation"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "New start time of the annotation in ISO 8601 format (e.g., '2023-04-01T00:00:00Z')"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "New end time of the annotation in ISO 8601 format (e.g., '2023-04-02T00:00:00Z')"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["ANNOTATION_CATEGORY_UNSPECIFIED", "ANALYTICS_AUTOMATIC", "ANALYTICS_MANUAL", "GOOGLE_ADS", "OTHER"],
+            "description": "New category of the annotation"
+          }
+        },
+        "required": ["property_id", "annotation_id"]
+      }
+    },
+    {
+      "name": "delete_annotation",
+      "description": "Delete an annotation from a Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          },
+          "annotation_id": {
+            "type": "string",
+            "description": "The ID of the annotation to delete"
+          }
+        },
+        "required": ["property_id", "annotation_id"]
+      }
+    }
+  ]
+}
