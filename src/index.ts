@@ -107,7 +107,7 @@ async function getAccessToken(): Promise<string> {
 
 // --- Tool: List Accounts ---
 server.tool(
-    "list_ga4_accounts",
+    "ga4_admin_api_list_accounts",
     "List all Google Analytics 4 accounts accessible by the service account.",
     {}, // No input parameters needed
     async (): Promise<CallToolResult> => {
@@ -153,7 +153,7 @@ server.tool(
 
 // --- Tool: Get Property Details ---
 server.tool(
-    "get_ga4_property_details",
+    "ga4_admin_api_get_property_details",
     "Get details for a specific Google Analytics 4 property.",
     // Input schema with Zod
     {
@@ -210,7 +210,7 @@ server.tool(
 
 // --- Tool: List Properties ---
 server.tool(
-    "list_ga4_properties",
+    "ga4_admin_api_list_properties",
     "List all Google Analytics 4 properties within a specific account.",
     {
         account_id: z.string().describe("The account ID (numeric part of the account name, e.g., '123456' from 'accounts/123456')"),
@@ -270,7 +270,7 @@ server.tool(
 
 // --- Tool: List Data Streams ---
 server.tool(
-    "list_data_streams",
+    "ga4_admin_api_list_data_streams",
     "List all data streams for a specific Google Analytics 4 property.",
     {
         property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
@@ -330,7 +330,7 @@ server.tool(
 
 // --- Tool: List Annotations ---
 server.tool(
-    "list_annotations",
+    "ga4_admin_api_list_annotations",
     "List all annotations for a specific Google Analytics 4 property.",
     {
         property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
@@ -416,7 +416,7 @@ server.tool(
 
 // --- Tool: Create Annotation ---
 server.tool(
-    "create_annotation",
+    "ga4_admin_api_create_annotation",
     "Create a new annotation for a specific Google Analytics 4 property.",
     {
         property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
@@ -542,7 +542,7 @@ server.tool(
 
 // --- Tool: Get Annotation ---
 server.tool(
-    "get_annotation",
+    "ga4_admin_api_get_annotation",
     "Get details of a specific annotation in a Google Analytics 4 property.",
     {
         property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
@@ -621,7 +621,7 @@ server.tool(
 
 // --- Tool: Update Annotation ---
 server.tool(
-    "update_annotation",
+    "ga4_admin_api_update_annotation",
     "Update an existing annotation in a Google Analytics 4 property.",
     {
         property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
@@ -791,7 +791,7 @@ server.tool(
 
 // --- Tool: Delete Annotation ---
 server.tool(
-    "delete_annotation",
+    "ga4_admin_api_delete_annotation",
     "Delete an annotation from a Google Analytics 4 property.",
     {
         property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
@@ -857,6 +857,436 @@ async function main() {
         process.exit(1);
     }
 }
+
+// --- Tool: List Audiences ---
+server.tool(
+    "ga4_admin_api_list_audiences",
+    "List all audiences for a specific Google Analytics 4 property.",
+    {
+        property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
+    },
+    async ({ property_id }): Promise<CallToolResult> => {
+        if (!analyticsAdminClient) {
+            return createErrorResponse("GA Admin Client is not initialized.");
+        }
+
+        const propertyName = `properties/${property_id}`;
+        console.error(`Running tool: list_audiences for ${propertyName}`); // Log to stderr
+
+        try {
+            // Obtain an access token
+            const accessToken = await getAccessToken();
+            
+            // Use axios to call the API directly since the Node.js client library doesn't support audiences yet
+            const apiUrl = `https://analyticsadmin.googleapis.com/v1alpha/${propertyName}/audiences`;
+            
+            const response = await axios.get(apiUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const audiences = response.data.audiences || [];
+
+            if (audiences.length === 0) {
+                return {
+                    content: [{ type: "text", text: `No audiences found for property ${property_id}.` }],
+                };
+            }
+
+            // Format for readability
+            const formattedAudiences = audiences.map((audience: any) => ({
+                name: audience.name,
+                displayName: audience.displayName,
+                description: audience.description,
+                membershipDurationDays: audience.membershipDurationDays,
+                adsPersonalizationEnabled: audience.adsPersonalizationEnabled,
+                createTime: audience.createTime,
+            }));
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ audiences: formattedAudiences }, null, 2),
+                    },
+                ],
+            };
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+                
+                if (status === 404) {
+                    return createErrorResponse(`Property '${propertyName}' not found.`);
+                }
+                if (status === 403) {
+                    return createErrorResponse(`Permission denied to access property '${propertyName}'. Check Service Account permissions in GA4.`);
+                }
+                return createErrorResponse(`Error listing audiences for property '${propertyName}': ${data.error?.message || JSON.stringify(data)}`);
+            }
+            return createErrorResponse(`Error listing audiences for property '${propertyName}'`, error);
+        }
+    }
+);
+
+// --- Tool: Get Audience ---
+server.tool(
+    "ga4_admin_api_get_audience",
+    "Get details of a specific audience in a Google Analytics 4 property.",
+    {
+        property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
+        audience_id: z.string().describe("The ID of the audience")
+    },
+    async ({ property_id, audience_id }): Promise<CallToolResult> => {
+        if (!analyticsAdminClient) {
+            return createErrorResponse("GA Admin Client is not initialized.");
+        }
+
+        const audienceName = `properties/${property_id}/audiences/${audience_id}`;
+        console.error(`Running tool: get_audience for ${audienceName}`); // Log to stderr
+
+        try {
+            // Obtain an access token
+            const accessToken = await getAccessToken();
+            
+            // Use axios to call the API directly
+            const apiUrl = `https://analyticsadmin.googleapis.com/v1alpha/${audienceName}`;
+            
+            const response = await axios.get(apiUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const audience = response.data;
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ audience }, null, 2),
+                    },
+                ],
+            };
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+                
+                if (status === 404) {
+                    return createErrorResponse(`Audience '${audienceName}' not found.`);
+                }
+                if (status === 403) {
+                    return createErrorResponse(`Permission denied to access audience '${audienceName}'. Check Service Account permissions in GA4.`);
+                }
+                return createErrorResponse(`Error getting audience '${audienceName}': ${data.error?.message || JSON.stringify(data)}`);
+            }
+            return createErrorResponse(`Error getting audience '${audienceName}'`, error);
+        }
+    }
+);
+
+// --- Tool: Create Audience ---
+server.tool(
+    "ga4_admin_api_create_audience",
+    "Create a new audience for a specific Google Analytics 4 property.",
+    {
+        property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
+        display_name: z.string().describe("Display name for the audience"),
+        description: z.string().describe("Description of the audience"),
+        membership_duration_days: z.number().int().min(1).max(540).describe("The duration a user should stay in the audience (1-540 days)"),
+    },
+    async ({ property_id, display_name, description, membership_duration_days }): Promise<CallToolResult> => {
+        if (!analyticsAdminClient) {
+            return createErrorResponse("GA Admin Client is not initialized.");
+        }
+
+        const propertyName = `properties/${property_id}`;
+        console.error(`Running tool: create_audience for ${propertyName}`); // Log to stderr
+
+        try {
+            // Obtain an access token
+            const accessToken = await getAccessToken();
+            
+            // Create a simple audience with basic required fields
+            const audienceData = {
+                displayName: display_name,
+                description: description,
+                membershipDurationDays: membership_duration_days,
+                // Add a simple filter clause (required for audience creation)
+                filterClauses: [
+                    {
+                        simpleFilter: {
+                            scope: "AUDIENCE_FILTER_SCOPE_ACROSS_ALL_SESSIONS",
+                            filterExpression: {
+                                dimensionOrMetricFilter: {
+                                    dimensionOrMetricName: "eventName",
+                                    stringFilter: {
+                                        matchType: "EXACT",
+                                        value: "page_view"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+            
+            // Use axios to call the API directly
+            const apiUrl = `https://analyticsadmin.googleapis.com/v1alpha/${propertyName}/audiences`;
+            
+            const response = await axios.post(apiUrl, audienceData, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const audience = response.data;
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ audience }, null, 2),
+                    },
+                ],
+            };
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+                
+                if (status === 404) {
+                    return createErrorResponse(`Property '${propertyName}' not found.`);
+                }
+                if (status === 403) {
+                    return createErrorResponse(`Permission denied to create audience in property '${propertyName}'. Check Service Account permissions in GA4.`);
+                }
+                if (status === 400) {
+                    return createErrorResponse(`Invalid audience data: ${data.error?.message || JSON.stringify(data)}`);
+                }
+                return createErrorResponse(`Error creating audience in property '${propertyName}': ${data.error?.message || JSON.stringify(data)}`);
+            }
+            return createErrorResponse(`Error creating audience in property '${propertyName}'`, error);
+        }
+    }
+);
+
+// --- Tool: List Custom Dimensions ---
+server.tool(
+    "ga4_admin_api_list_custom_dimensions",
+    "List all custom dimensions for a specific Google Analytics 4 property.",
+    {
+        property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
+    },
+    async ({ property_id }): Promise<CallToolResult> => {
+        if (!analyticsAdminClient) {
+            return createErrorResponse("GA Admin Client is not initialized.");
+        }
+
+        const propertyName = `properties/${property_id}`;
+        console.error(`Running tool: list_custom_dimensions for ${propertyName}`); // Log to stderr
+
+        try {
+            // Obtain an access token
+            const accessToken = await getAccessToken();
+            
+            // Use axios to call the API directly
+            const apiUrl = `https://analyticsadmin.googleapis.com/v1alpha/${propertyName}/customDimensions`;
+            
+            const response = await axios.get(apiUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const customDimensions = response.data.customDimensions || [];
+
+            if (customDimensions.length === 0) {
+                return {
+                    content: [{ type: "text", text: `No custom dimensions found for property ${property_id}.` }],
+                };
+            }
+
+            // Format for readability
+            const formattedDimensions = customDimensions.map((dimension: any) => ({
+                name: dimension.name,
+                parameterName: dimension.parameterName,
+                displayName: dimension.displayName,
+                description: dimension.description,
+                scope: dimension.scope,
+                disallowAdsPersonalization: dimension.disallowAdsPersonalization
+            }));
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ customDimensions: formattedDimensions }, null, 2),
+                    },
+                ],
+            };
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+                
+                if (status === 404) {
+                    return createErrorResponse(`Property '${propertyName}' not found.`);
+                }
+                if (status === 403) {
+                    return createErrorResponse(`Permission denied to access property '${propertyName}'. Check Service Account permissions in GA4.`);
+                }
+                return createErrorResponse(`Error listing custom dimensions for property '${propertyName}': ${data.error?.message || JSON.stringify(data)}`);
+            }
+            return createErrorResponse(`Error listing custom dimensions for property '${propertyName}'`, error);
+        }
+    }
+);
+
+// --- Tool: Get Custom Dimension ---
+server.tool(
+    "ga4_admin_api_get_custom_dimension",
+    "Get details of a specific custom dimension in a Google Analytics 4 property.",
+    {
+        property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
+        dimension_id: z.string().describe("The ID of the custom dimension")
+    },
+    async ({ property_id, dimension_id }): Promise<CallToolResult> => {
+        if (!analyticsAdminClient) {
+            return createErrorResponse("GA Admin Client is not initialized.");
+        }
+
+        const dimensionName = `properties/${property_id}/customDimensions/${dimension_id}`;
+        console.error(`Running tool: get_custom_dimension for ${dimensionName}`); // Log to stderr
+
+        try {
+            // Obtain an access token
+            const accessToken = await getAccessToken();
+            
+            // Use axios to call the API directly
+            const apiUrl = `https://analyticsadmin.googleapis.com/v1alpha/${dimensionName}`;
+            
+            const response = await axios.get(apiUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const customDimension = response.data;
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ customDimension }, null, 2),
+                    },
+                ],
+            };
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+                
+                if (status === 404) {
+                    return createErrorResponse(`Custom dimension '${dimensionName}' not found.`);
+                }
+                if (status === 403) {
+                    return createErrorResponse(`Permission denied to access custom dimension '${dimensionName}'. Check Service Account permissions in GA4.`);
+                }
+                return createErrorResponse(`Error getting custom dimension '${dimensionName}': ${data.error?.message || JSON.stringify(data)}`);
+            }
+            return createErrorResponse(`Error getting custom dimension '${dimensionName}'`, error);
+        }
+    }
+);
+
+// --- Tool: Create Custom Dimension ---
+server.tool(
+    "ga4_admin_api_create_custom_dimension",
+    "Create a new custom dimension for a specific Google Analytics 4 property.",
+    {
+        property_id: z.string().regex(/^\d+$/, "Property ID must be numeric").describe("The numeric ID of the GA4 property (e.g., '123456789')"),
+        parameter_name: z.string().regex(/^[a-zA-Z][a-zA-Z0-9_]{0,39}$/, "Parameter name must start with a letter and contain only alphanumeric characters and underscores").describe("The parameter name for the custom dimension"),
+        display_name: z.string().max(82).describe("Display name for the custom dimension"),
+        description: z.string().max(150).optional().describe("Optional description for the custom dimension"),
+        scope: z.enum(["EVENT", "USER", "ITEM"]).describe("The scope of the custom dimension (EVENT, USER, or ITEM)"),
+        disallow_ads_personalization: z.boolean().optional().describe("Optional. If true, excludes this dimension from ads personalization")
+    },
+    async ({ property_id, parameter_name, display_name, description, scope, disallow_ads_personalization }): Promise<CallToolResult> => {
+        if (!analyticsAdminClient) {
+            return createErrorResponse("GA Admin Client is not initialized.");
+        }
+
+        const propertyName = `properties/${property_id}`;
+        console.error(`Running tool: create_custom_dimension for ${propertyName}`); // Log to stderr
+
+        try {
+            // Obtain an access token
+            const accessToken = await getAccessToken();
+            
+            // Create custom dimension data
+            const dimensionData: any = {
+                parameterName: parameter_name,
+                displayName: display_name,
+                scope: scope
+            };
+            
+            // Add optional fields if provided
+            if (description) {
+                dimensionData.description = description;
+            }
+            
+            if (disallow_ads_personalization !== undefined) {
+                dimensionData.disallowAdsPersonalization = disallow_ads_personalization;
+            }
+            
+            // Use axios to call the API directly
+            const apiUrl = `https://analyticsadmin.googleapis.com/v1alpha/${propertyName}/customDimensions`;
+            
+            const response = await axios.post(apiUrl, dimensionData, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const customDimension = response.data;
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ customDimension }, null, 2),
+                    },
+                ],
+            };
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+                
+                if (status === 404) {
+                    return createErrorResponse(`Property '${propertyName}' not found.`);
+                }
+                if (status === 403) {
+                    return createErrorResponse(`Permission denied to create custom dimension in property '${propertyName}'. Check Service Account permissions in GA4.`);
+                }
+                if (status === 400) {
+                    return createErrorResponse(`Invalid custom dimension data: ${data.error?.message || JSON.stringify(data)}`);
+                }
+                return createErrorResponse(`Error creating custom dimension in property '${propertyName}': ${data.error?.message || JSON.stringify(data)}`);
+            }
+            return createErrorResponse(`Error creating custom dimension in property '${propertyName}'`, error);
+        }
+    }
+);
 
 // Run main function
 main().catch((error) => {

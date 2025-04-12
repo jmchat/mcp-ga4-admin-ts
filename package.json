@@ -25,6 +25,14 @@
   ],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmchat/mcp-ga4-admin-ts.git"
+  },
+  "homepage": "https://github.com/jmchat/mcp-ga4-admin-ts#readme",
+  "bugs": {
+    "url": "https://github.com/jmchat/mcp-ga4-admin-ts/issues"
+  },
   "dependencies": {
     "@google-analytics/admin": "^8.1.0",
     "@modelcontextprotocol/sdk": "^1.8.0",

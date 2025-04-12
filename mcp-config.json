@@ -7,11 +7,11 @@
   },
   "tools": [
     {
-      "name": "list_ga4_accounts",
+      "name": "ga4_admin_api_list_accounts",
       "description": "List all Google Analytics 4 accounts accessible by the service account."
     },
     {
-      "name": "get_ga4_property_details",
+      "name": "ga4_admin_api_get_property_details",
       "description": "Get details for a specific Google Analytics 4 property.",
       "parameters": {
         "type": "object",
@@ -25,7 +25,7 @@
       }
     },
     {
-      "name": "list_ga4_properties",
+      "name": "ga4_admin_api_list_properties",
       "description": "List all Google Analytics 4 properties within a specific account.",
       "parameters": {
         "type": "object",
@@ -39,7 +39,7 @@
       }
     },
     {
-      "name": "list_data_streams",
+      "name": "ga4_admin_api_list_data_streams",
       "description": "List all data streams for a specific Google Analytics 4 property.",
       "parameters": {
         "type": "object",
@@ -53,7 +53,7 @@
       }
     },
     {
-      "name": "list_annotations",
+      "name": "ga4_admin_api_list_annotations",
       "description": "List all annotations for a specific Google Analytics 4 property.",
       "parameters": {
         "type": "object",
@@ -67,7 +67,7 @@
       }
     },
     {
-      "name": "create_annotation",
+      "name": "ga4_admin_api_create_annotation",
       "description": "Create a new annotation for a specific Google Analytics 4 property.",
       "parameters": {
         "type": "object",
@@ -103,7 +103,7 @@
       }
     },
     {
-      "name": "get_annotation",
+      "name": "ga4_admin_api_get_annotation",
       "description": "Get details of a specific annotation in a Google Analytics 4 property.",
       "parameters": {
         "type": "object",
@@ -121,7 +121,7 @@
       }
     },
     {
-      "name": "update_annotation",
+      "name": "ga4_admin_api_update_annotation",
       "description": "Update an existing annotation in a Google Analytics 4 property.",
       "parameters": {
         "type": "object",
@@ -156,7 +156,7 @@
       }
     },
     {
-      "name": "delete_annotation",
+      "name": "ga4_admin_api_delete_annotation",
       "description": "Delete an annotation from a Google Analytics 4 property.",
       "parameters": {
         "type": "object",
@@ -171,6 +171,131 @@
           }
         },
         "required": ["property_id", "annotation_id"]
+      }
+    },
+    {
+      "name": "ga4_admin_api_list_audiences",
+      "description": "List all audiences for a specific Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          }
+        },
+        "required": ["property_id"]
+      }
+    },
+    {
+      "name": "ga4_admin_api_get_audience",
+      "description": "Get details of a specific audience in a Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          },
+          "audience_id": {
+            "type": "string",
+            "description": "The ID of the audience"
+          }
+        },
+        "required": ["property_id", "audience_id"]
+      }
+    },
+    {
+      "name": "ga4_admin_api_create_audience",
+      "description": "Create a new audience for a specific Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Display name for the audience"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the audience"
+          },
+          "membership_duration_days": {
+            "type": "integer",
+            "description": "The duration a user should stay in the audience (1-540 days)"
+          }
+        },
+        "required": ["property_id", "display_name", "description", "membership_duration_days"]
+      }
+    },
+    {
+      "name": "ga4_admin_api_list_custom_dimensions",
+      "description": "List all custom dimensions for a specific Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          }
+        },
+        "required": ["property_id"]
+      }
+    },
+    {
+      "name": "ga4_admin_api_get_custom_dimension",
+      "description": "Get details of a specific custom dimension in a Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          },
+          "dimension_id": {
+            "type": "string",
+            "description": "The ID of the custom dimension"
+          }
+        },
+        "required": ["property_id", "dimension_id"]
+      }
+    },
+    {
+      "name": "ga4_admin_api_create_custom_dimension",
+      "description": "Create a new custom dimension for a specific Google Analytics 4 property.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "The numeric ID of the GA4 property (e.g., '123456789')"
+          },
+          "parameter_name": {
+            "type": "string",
+            "description": "The parameter name for the custom dimension"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Display name for the custom dimension"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description for the custom dimension"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["EVENT", "USER", "ITEM"],
+            "description": "The scope of the custom dimension (EVENT, USER, or ITEM)"
+          },
+          "disallow_ads_personalization": {
+            "type": "boolean",
+            "description": "Optional. If true, excludes this dimension from ads personalization"
+          }
+        },
+        "required": ["property_id", "parameter_name", "display_name", "scope"]
       }
     }
   ]
