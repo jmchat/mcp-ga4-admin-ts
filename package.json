@@ -1,6 +1,6 @@
 {
   "name": "mcp-ga4-admin",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Google Analytics 4 Admin API tools via Model Context Protocol",
   "main": "dist/index.js",
   "bin": {
