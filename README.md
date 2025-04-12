@@ -47,17 +47,27 @@ Note: The `.env` file is completely optional. The package will work fine with ju
 The MCP provides the following functions:
 
 ### Account and Property Management
-- `list_ga4_accounts` - List all GA4 accounts
-- `list_ga4_properties` - List all GA4 properties within an account
-- `get_ga4_property_details` - Get details of a specific GA4 property
-- `list_data_streams` - List all data streams for a specific GA4 property
+- `ga4_admin_api_list_accounts` - List all GA4 accounts
+- `ga4_admin_api_list_properties` - List all GA4 properties within an account
+- `ga4_admin_api_get_property_details` - Get details of a specific GA4 property
+- `ga4_admin_api_list_data_streams` - List all data streams for a specific GA4 property
 
 ### Annotations Management
-- `list_annotations` - List all annotations for a GA4 property
-- `get_annotation` - Get details of a specific annotation
-- `create_annotation` - Create a new annotation
-- `update_annotation` - Update an existing annotation
-- `delete_annotation` - Delete an annotation
+- `ga4_admin_api_list_annotations` - List all annotations for a GA4 property
+- `ga4_admin_api_get_annotation` - Get details of a specific annotation
+- `ga4_admin_api_create_annotation` - Create a new annotation
+- `ga4_admin_api_update_annotation` - Update an existing annotation
+- `ga4_admin_api_delete_annotation` - Delete an annotation
+
+### Audiences Management
+- `ga4_admin_api_list_audiences` - List all audiences for a GA4 property
+- `ga4_admin_api_get_audience` - Get details of a specific audience
+- `ga4_admin_api_create_audience` - Create a new audience
+
+### Custom Dimensions Management
+- `ga4_admin_api_list_custom_dimensions` - List all custom dimensions for a GA4 property
+- `ga4_admin_api_get_custom_dimension` - Get details of a specific custom dimension
+- `ga4_admin_api_create_custom_dimension` - Create a new custom dimension
 
 ## Usage with Claude
 
